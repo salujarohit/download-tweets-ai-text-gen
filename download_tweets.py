@@ -52,9 +52,9 @@ def download_tweets(
     :return tweets: List of tweets from the Twitter account
     """
 
-    # If a limit is specificed, validate that it is a multiple of 20
+    # If a limit is specificed, validate that it is a multiple of 40
     if limit:
-        assert limit % 20 == 0, "`limit` must be a multiple of 20."
+        assert limit % 40 == 0, "`limit` must be a multiple of 40."
 
     # If no limit specifed, estimate the total number of tweets from profile.
     else:
@@ -89,7 +89,7 @@ def download_tweets(
         w.writerow(["tweets"])  # gpt-2-simple expects a CSV header by default
 
         pbar = tqdm(range(limit), desc="Oldest Tweet")
-        for i in range((limit // 20) - 1):
+        for i in range(limit // 40):
             tweet_data = []
 
             # twint may fail; give it up to 5 tries to return tweets
@@ -144,14 +144,13 @@ def download_tweets(
                     if tweet != "":
                         w.writerow([tweet])
 
-            if i > 0:
-                pbar.update(20)
-            else:
+            # Update progress bar as long as we collected tweets
+            if len(tweet_data) > 0:
                 pbar.update(40)
-            oldest_tweet = datetime.utcfromtimestamp(
-                tweet_data[-1].datetime / 1000.0
-            ).strftime("%Y-%m-%d %H:%M:%S")
-            pbar.set_description("Oldest Tweet: " + oldest_tweet)
+                oldest_tweet = datetime.utcfromtimestamp(
+                    tweet_data[-1].datetime / 1000.0
+                ).strftime("%Y-%m-%d %H:%M:%S")
+                pbar.set_description("Oldest Tweet: " + oldest_tweet)
 
     pbar.close()
     os.remove(".temp")
