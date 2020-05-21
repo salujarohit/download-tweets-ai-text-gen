@@ -114,14 +114,7 @@ def download_tweets(
 
             # If still no tweets after multiple tries, we're done
             if len(tweet_data) == 0:
-                c = twint.Config()
-                c.Store_object = True
-                c.Hide_output = True
-                c.Username = username
-                c.Limit = 40
-                c.Resume = ".temp"
-
-                c.Store_object_tweets_list = tweet_data
+                break
 
             if not include_replies:
                 tweets = [
@@ -144,13 +137,12 @@ def download_tweets(
                     if tweet != "":
                         w.writerow([tweet])
 
-            # Update progress bar as long as we collected tweets
-            if len(tweet_data) > 0:
-                pbar.update(40)
-                oldest_tweet = datetime.utcfromtimestamp(
-                    tweet_data[-1].datetime / 1000.0
-                ).strftime("%Y-%m-%d %H:%M:%S")
-                pbar.set_description("Oldest Tweet: " + oldest_tweet)
+
+            pbar.update(40)
+            oldest_tweet = datetime.utcfromtimestamp(
+                tweet_data[-1].datetime / 1000.0
+            ).strftime("%Y-%m-%d %H:%M:%S")
+            pbar.set_description("Oldest Tweet: " + oldest_tweet)
 
     pbar.close()
     os.remove(".temp")
